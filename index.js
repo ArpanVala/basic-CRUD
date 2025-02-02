@@ -24,8 +24,16 @@ app.post("/std-insert",async (req,res)=>{
     const db = await connection()
     const studentCollection = db.collection("students")
 
-    const {s_name,s_age}= req.body;
-    const obj={s_name,s_age}
+    const {s_name,s_age,s_mail}= req.body;
+    const obj={s_name,s_age,s_mail}
+
+
+    // check if email already existed 
+    const checkEmail = await studentCollection.findOne({s_mail})
+    if(checkEmail != null){
+        res.send({"status":0,"msg":"emial already existed"})
+        return
+    }
 
     const insertRes = await studentCollection.insertOne(obj)
 
@@ -60,7 +68,7 @@ app.put("/std-update/:id",async(req,res)=>{
     const studentCollection = db.collection("students")
     
     const {id} = req.params
-    const {s_name,s_age}= req.body
+    const {s_name,s_age,s_mail}= req.body
     const updatedData = {}
 
     if(s_name != "" && s_name != null && s_name != undefined){
@@ -69,6 +77,10 @@ app.put("/std-update/:id",async(req,res)=>{
     
     if(s_age != "" && s_age != null && s_age != undefined){
         updatedData['s_age']=s_age
+    }
+
+    if(s_mail != "" && s_mail != null && s_mail != undefined){
+        updatedData['s_mail']=s_mail
     }
     
     const upadteRes = await studentCollection.updateOne({_id:new ObjectId(id)},{$set:updatedData})
